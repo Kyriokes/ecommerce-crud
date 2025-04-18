@@ -1,6 +1,6 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import cors from 'cors';
-import productRoutes from './routes/product';
+import productRoutes from './routes/productRoutes';
 
 const app = express();
 const PORT = 3000;
@@ -10,8 +10,8 @@ app.use(express.json());
 
 app.use('/products', productRoutes);
 
-app.get('/',(req,res)=>{
-    res.send('Server up!')
+app.get('/', (_req: Request, res: Response) => {
+    res.send('Server up!');
 });
 
 app.listen(PORT, ()=>{
