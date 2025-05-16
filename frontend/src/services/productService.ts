@@ -10,7 +10,7 @@ export const getProductById = async (id: string) => {
     return res.json();
 };
 
-export const createProduct = async (productData: any) => {
+export const createProduct = async (productData: object) => {
     const res = await fetch(`${BASE_URL}/products`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -19,7 +19,7 @@ export const createProduct = async (productData: any) => {
     return res.json();
 };
 
-export const updateProduct = async (id: string, productData: any) => {
+export const updateProduct = async (id: string, productData: object) => {
     const res = await fetch(`${BASE_URL}/products/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
