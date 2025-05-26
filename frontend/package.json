@@ -1,13 +1,15 @@
 {
     "name": "ecommerce-frontend",
     "private": true,
-    "version": "0.0.0",
+    "version": "1.0.0",
+    "description": "Modern ecommerce frontend built with React, TypeScript, and Tailwind CSS",
     "type": "module",
     "scripts": {
         "dev": "vite",
         "build": "tsc -b && vite build",
         "lint": "eslint .",
-        "preview": "vite preview"
+        "preview": "vite preview",
+        "type-check": "tsc --noEmit"
     },
     "dependencies": {
         "@tailwindcss/vite": "^4.1.4",

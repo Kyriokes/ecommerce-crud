@@ -1,29 +1,29 @@
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+import { apiClient } from "../utils/api";
+import type { CartItem } from "../types";
 
-export const getCartbyUserId = async (id: string) => {
-    const res = await fetch(`${BASE_URL}/cart/${id}`);
-    return res.json();
-};
+export interface AddToCartData {
+    productId: number;
+    quantity: number;
+}
 
-export const addToCart = async (cartData: object) => {
-    const res = await fetch(`${BASE_URL}/cart`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(cartData),
-    });
-    return res.json();
-};
+export const cartService = {
+    async getCart(): Promise<CartItem[]> {
+        console.log("🛒 Fetching cart");
+        return apiClient.get<CartItem[]>("/api/cart");
+    },
 
-export const updateCartItem = async (id: string, cartData: object) => {
-    const res = await fetch(`${BASE_URL}/cart/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(cartData),
-    });
-    return res.json();
-};
+    async addToCart(data: AddToCartData): Promise<CartItem> {
+        console.log("➕ Adding to cart:", data);
+        return apiClient.post<CartItem>("/api/cart", data);
+    },
 
-export const deleteCart = async (id: string) => {
-    const res = await fetch(`${BASE_URL}/cart/${id}`, { method: "DELETE" });
-    return res.json();
+    async updateCartItem(id: number, quantity: number): Promise<CartItem> {
+        console.log("📝 Updating cart item:", id, "quantity:", quantity);
+        return apiClient.put<CartItem>(`/api/cart/${id}`, { quantity });
+    },
+
+    async removeFromCart(id: number): Promise<{ message: string }> {
+        console.log("🗑️ Removing from cart:", id);
+        return apiClient.delete<{ message: string }>(`/api/cart/${id}`);
+    },
 };

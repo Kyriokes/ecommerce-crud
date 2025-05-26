@@ -7,35 +7,85 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id            Int @id @default(autoincrement())
+  username      String @unique
+  email         String @unique
+  password      String?
+  provider      AuthProvider @default(CREDENTIALS)
+  isAdmin       Boolean @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  googleId      String?  @unique
+
+  carts         Cart[]
+  orders        Order[]
+}
+
+enum AuthProvider {
+  CREDENTIALS
+  GOOGLE
+}
+
 model Product {
   id            Int       @id @default(autoincrement())
   name          String
   description   String?
   price         Float
   stock         Int
+  imageUrl      String?
+  category      String?
+  isActive      Boolean  @default(true)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
   carts         Cart[]
+  orderItems    OrderItem[]
 }
 
-model User {
-  id            Int @id @default(autoincrement())
-  username      String @unique
-  email         String @unique
-  password      String
-  createdAt     DateTime @default(now())
-
-  carts         Cart[]
-}
-
-model Cart{
+model Cart {
   id        Int       @id @default(autoincrement())
   userId    Int
   productId Int
   quantity  Int
   createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
-  user      User      @relation(fields:[userId], references:[id])
-  product   Product   @relation(fields:[productId], references:[id])
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product   Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+}
+
+model Order {
+  id              Int         @id @default(autoincrement())
+  userId          Int
+  total           Float
+  status          OrderStatus @default(PENDING)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  shippingAddress String
+  paymentId       String?
+
+  user    User        @relation(fields: [userId], references: [id])
+  items   OrderItem[]
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  CANCELLED
+  SHIPPED
+  DELIVERED
+}
+
+model OrderItem {
+  id          Int @id @default(autoincrement())
+  orderId     Int
+  productId   Int
+  quantity    Int
+  unitPrice   Float
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
 }

@@ -1,64 +1,90 @@
-import React from "react";
-import { Link } from "react-router-dom";
+"use client";
 
-const Navbar: React.FC<{ user: string | null; onLogout: () => void }> = ({
-    user,
-    onLogout,
-}) => {
+import type React from "react";
+import { Link, useLocation } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
+import { UserMenu } from "./UserMenu";
+import { Button } from "./ui/Button";
+
+export const Navbar: React.FC = () => {
+    const { isAuthenticated, loading } = useAuth();
+    const location = useLocation();
+
+    const isActive = (path: string) => location.pathname === path;
+
+    const navLinkClass = (path: string) => `
+    px-3 py-2 rounded-md text-sm font-medium transition-colors
+    ${
+        isActive(path)
+            ? "bg-indigo-700 text-white"
+            : "text-indigo-100 hover:bg-indigo-600 hover:text-white"
+    }
+  `;
+
     return (
-        <nav className="bg-blue-600 p-4 text-white">
-            <div className="flex justify-between items-center">
-                <h1 className="text-xl font-bold">Mi E-Commerce</h1>
-                <div>
-                    <Link
-                        to="/"
-                        className="px-4 py-2 bg-blue-800 rounded hover:bg-blue-700"
-                    >
-                        Inicio
-                    </Link>
-                    <Link
-                        to="/products"
-                        className="px-4 py-2 ml-4 bg-blue-800 rounded hover:bg-blue-700"
-                    >
-                        Productos
-                    </Link>
-                    <Link
-                        to="/cart"
-                        className="px-4 py-2 ml-4 bg-blue-800 rounded hover:bg-blue-700"
-                    >
-                        Carrito
-                    </Link>
-                    {user ? (
-                        <div className="ml-4 flex items-center">
-                            <span className="mr-2">Hola, {user}</span>
-                            <button
-                                className="px-4 py-2 bg-red-600 rounded hover:bg-red-500"
-                                onClick={onLogout}
-                            >
-                                Cerrar sesión
-                            </button>
+        <nav className="bg-indigo-600 shadow-lg">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="flex justify-between h-16">
+                    <div className="flex items-center">
+                        <Link to="/" className="flex-shrink-0">
+                            <h1 className="text-xl font-bold text-white">
+                                🛍️ EcoShop
+                            </h1>
+                        </Link>
+
+                        <div className="hidden md:block ml-10">
+                            <div className="flex items-baseline space-x-4">
+                                <Link to="/" className={navLinkClass("/")}>
+                                    Inicio
+                                </Link>
+                                <Link
+                                    to="/products"
+                                    className={navLinkClass("/products")}
+                                >
+                                    Productos
+                                </Link>
+                                {isAuthenticated && (
+                                    <Link
+                                        to="/cart"
+                                        className={navLinkClass("/cart")}
+                                    >
+                                        Carrito
+                                    </Link>
+                                )}
+                            </div>
                         </div>
-                    ) : (
-                        // Si no está logeado, mostramos los botones de login y register
-                        <div className="ml-4">
-                            <Link
-                                to="/login"
-                                className="px-4 py-2 bg-blue-800 rounded hover:bg-blue-700"
-                            >
-                                Iniciar sesión
-                            </Link>
-                            <Link
-                                to="/register"
-                                className="px-4 py-2 ml-4 bg-blue-800 rounded hover:bg-blue-700"
-                            >
-                                Registrarse
-                            </Link>
-                        </div>
-                    )}
+                    </div>
+
+                    <div className="flex items-center space-x-4">
+                        {loading ? (
+                            <div className="w-8 h-8 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                        ) : isAuthenticated ? (
+                            <UserMenu />
+                        ) : (
+                            <>
+                                <Link to="/login">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="text-indigo-600 bg-white border-white hover:text-white hover:bg-indigo-600"
+                                    >
+                                        Iniciar sesión
+                                    </Button>
+                                </Link>
+                                <Link to="/register">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="text-indigo-600 bg-white border-white hover:text-white hover:bg-indigo-600"
+                                    >
+                                        Registrarse
+                                    </Button>
+                                </Link>
+                            </>
+                        )}
+                    </div>
                 </div>
             </div>
         </nav>
     );
 };
-
-export default Navbar;

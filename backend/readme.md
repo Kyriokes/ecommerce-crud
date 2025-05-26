@@ -20,32 +20,32 @@ Backend API para aplicación de ecommerce construida con Node.js, Express, Prism
 ## 🛠️ Instalación
 
 1. **Clonar el repositorio**
-\`\`\`bash
+```bash
 git clone <repository-url>
 cd ecommerce-crud/backend
-\`\`\`
+```
 
 2. **Instalar dependencias**
-\`\`\`bash
+```bash
 npm install
-\`\`\`
+```
 
 3. **Configurar variables de entorno**
-\`\`\`bash
+```bash
 cp .env.example .env
-\`\`\`
+```
 
-Editar \`.env\` con tus valores:
-\`\`\`env
+Editar `.env` con tus valores:
+```env
 DATABASE_URL="postgresql://username:password@localhost:5432/ecommerce_db"
 SUPABASE_URL="https://your-project.supabase.co"
 PORT=3000
 NODE_ENV=development
 FRONTEND_URL="http://localhost:5173"
-\`\`\`
+```
 
 4. **Configurar base de datos**
-\`\`\`bash
+```bash
 # Generar cliente Prisma
 npm run db:generate
 
@@ -54,48 +54,48 @@ npm run db:migrate
 
 # (Opcional) Poblar con datos de prueba
 npm run seed
-\`\`\`
+```
 
 ## 🚀 Uso
 
 ### Desarrollo
-\`\`\`bash
+```bash
 npm run dev
-\`\`\`
+```
 
 ### Producción
-\`\`\`bash
+```bash
 npm run build
 npm start
-\`\`\`
+```
 
 ## 📚 API Endpoints
 
 ### Autenticación
 Todas las rutas protegidas requieren header:
-\`\`\`
+```
 Authorization: Bearer <supabase-jwt-token>
-\`\`\`
+```
 
 ### Productos
-- \`GET /api/products\` - Listar productos (público)
-- \`GET /api/products/:id\` - Obtener producto (público)
-- \`POST /api/products\` - Crear producto (protegido)
-- \`PUT /api/products/:id\` - Actualizar producto (protegido)
-- \`DELETE /api/products/:id\` - Eliminar producto (protegido)
+- `GET /api/products` - Listar productos (público)
+- `GET /api/products/:id` - Obtener producto (público)
+- `POST /api/products` - Crear producto (protegido)
+- `PUT /api/products/:id` - Actualizar producto (protegido)
+- `DELETE /api/products/:id` - Eliminar producto (protegido)
 
 ### Usuarios
-- \`POST /api/users\` - Registrar usuario (público)
-- \`GET /api/users\` - Listar usuarios (protegido)
-- \`GET /api/users/:id\` - Obtener usuario (protegido)
-- \`PUT /api/users/:id\` - Actualizar usuario (protegido)
-- \`DELETE /api/users/:id\` - Eliminar usuario (protegido)
+- `POST /api/users` - Registrar usuario (público)
+- `GET /api/users` - Listar usuarios (protegido)
+- `GET /api/users/:id` - Obtener usuario (protegido)
+- `PUT /api/users/:id` - Actualizar usuario (protegido)
+- `DELETE /api/users/:id` - Eliminar usuario (protegido)
 
 ### Carrito
-- \`GET /api/cart\` - Obtener carrito del usuario (protegido)
-- \`POST /api/cart\` - Agregar al carrito (protegido)
-- \`PUT /api/cart/:id\` - Actualizar cantidad (protegido)
-- \`DELETE /api/cart/:id\` - Eliminar del carrito (protegido)
+- `GET /api/cart` - Obtener carrito del usuario (protegido)
+- `POST /api/cart` - Agregar al carrito (protegido)
+- `PUT /api/cart/:id` - Actualizar cantidad (protegido)
+- `DELETE /api/cart/:id` - Eliminar del carrito (protegido)
 
 ## 🗄️ Esquema de Base de Datos
 
@@ -108,13 +108,13 @@ Authorization: Bearer <supabase-jwt-token>
 
 ## 🔧 Scripts Disponibles
 
-- \`npm run dev\` - Servidor de desarrollo
-- \`npm run build\` - Compilar TypeScript
-- \`npm start\` - Ejecutar en producción
-- \`npm run db:migrate\` - Ejecutar migraciones
-- \`npm run db:generate\` - Generar cliente Prisma
-- \`npm run db:studio\` - Abrir Prisma Studio
-- \`npm run seed\` - Poblar base de datos
+- `npm run dev` - Servidor de desarrollo
+- `npm run build` - Compilar TypeScript
+- `npm start` - Ejecutar en producción
+- `npm run db:migrate` - Ejecutar migraciones
+- `npm run db:generate` - Generar cliente Prisma
+- `npm run db:studio` - Abrir Prisma Studio
+- `npm run seed` - Poblar base de datos
 
 ## 🛡️ Seguridad
 
@@ -127,7 +127,7 @@ Authorization: Bearer <supabase-jwt-token>
 ## 📝 Ejemplos de Uso
 
 ### Crear un producto
-\`\`\`bash
+```bash
 curl -X POST http://localhost:3000/api/products \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer <token>" \\
@@ -138,10 +138,10 @@ curl -X POST http://localhost:3000/api/products \\
     "stock": 10,
     "category": "Electronics"
   }'
-\`\`\`
+```
 
 ### Agregar al carrito
-\`\`\`bash
+```bash
 curl -X POST http://localhost:3000/api/cart \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer <token>" \\
@@ -149,32 +149,32 @@ curl -X POST http://localhost:3000/api/cart \\
     "productId": 1,
     "quantity": 2
   }'
-\`\`\`
+```
 
 ## 🐛 Troubleshooting
 
 ### Error de conexión a base de datos
 - Verificar que PostgreSQL esté ejecutándose
-- Comprobar \`DATABASE_URL\` en \`.env\`
-- Ejecutar \`npm run db:migrate\`
+- Comprobar `DATABASE_URL` en `.env`
+- Ejecutar `npm run db:migrate`
 
 ### Error de autenticación
-- Verificar \`SUPABASE_URL\` en \`.env\`
+- Verificar `SUPABASE_URL` en `.env`
 - Comprobar que el token JWT sea válido
 - Verificar configuración de Supabase
 
 ## 🤝 Contribución
 
 1. Fork el proyecto
-2. Crear rama feature (\`git checkout -b feature/AmazingFeature\`)
-3. Commit cambios (\`git commit -m 'Add some AmazingFeature'\`)
-4. Push a la rama (\`git push origin feature/AmazingFeature\`)
+2. Crear rama feature (`git checkout -b feature/AmazingFeature`)
+3. Commit cambios (`git commit -m 'Add some AmazingFeature'`)
+4. Push a la rama (`git push origin feature/AmazingFeature`)
 5. Abrir Pull Request
 
 ## 📄 Licencia
 
 Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para detalles.
-\`\`\`
+```
 
 ## 📋 Resumen de Mejoras Implementadas
 
@@ -207,3 +207,4 @@ Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) par
 - Verificación de productos activos
 - Manejo de stock en carrito
 - Endpoints de salud y documentación
+

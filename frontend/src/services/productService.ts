@@ -1,36 +1,27 @@
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+import { apiClient } from "../utils/api";
+import type { Product } from "../types";
 
-export const getAllProducts = async () => {
-    const res = await fetch(`${BASE_URL}/products`);
-    return res.json();
-};
+export const productService = {
+    async getAllProducts(): Promise<Product[]> {
+        return apiClient.get<Product[]>("/api/products");
+    },
 
-export const getProductById = async (id: string) => {
-    const res = await fetch(`${BASE_URL}/products/${id}`);
-    return res.json();
-};
+    async getProductById(id: number): Promise<Product> {
+        return apiClient.get<Product>(`/api/products/${id}`);
+    },
 
-export const createProduct = async (productData: object) => {
-    const res = await fetch(`${BASE_URL}/products`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(productData),
-    });
-    return res.json();
-};
+    async createProduct(productData: Partial<Product>): Promise<Product> {
+        return apiClient.post<Product>("/api/products", productData);
+    },
 
-export const updateProduct = async (id: string, productData: object) => {
-    const res = await fetch(`${BASE_URL}/products/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(productData),
-    });
-    return res.json();
-};
+    async updateProduct(
+        id: number,
+        productData: Partial<Product>
+    ): Promise<Product> {
+        return apiClient.put<Product>(`/api/products/${id}`, productData);
+    },
 
-export const deleteProduct = async (id: string) => {
-    const res = await fetch(`${BASE_URL}/products/${id}`, {
-        method: "DELETE",
-    });
-    return res.json();
+    async deleteProduct(id: number): Promise<{ message: string }> {
+        return apiClient.delete<{ message: string }>(`/api/products/${id}`);
+    },
 };

@@ -1,25 +1,49 @@
 {
-    "name": "backend",
+    "name": "ecommerce-backend",
     "version": "1.0.0",
-    "main": "index.js",
+    "description": "Backend API for ecommerce application with authentication and cart management",
+    "main": "dist/index.js",
     "scripts": {
-        "dev": "ts-node-dev src/index.ts",
-        "seed": "ts-node prisma/seed.ts"
+        "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+        "build": "tsc",
+        "start": "node dist/index.js",
+        "seed": "ts-node src/prisma/seed.ts",
+        "db:migrate": "prisma migrate dev",
+        "db:generate": "prisma generate",
+        "db:studio": "prisma studio",
+        "db:reset": "prisma migrate reset",
+        "lint": "eslint src/**/*.ts",
+        "test": "echo \"Error: no test specified\" && exit 1"
     },
-    "keywords": [],
-    "author": "",
-    "license": "ISC",
-    "description": "",
+    "keywords": [
+        "ecommerce",
+        "api",
+        "nodejs",
+        "express",
+        "prisma",
+        "typescript"
+    ],
+    "author": "Sergio Ferrari Bryce",
+    "license": "MIT",
     "dependencies": {
-        "@prisma/client": "6.6.0",
-        "cors": "2.8.5",
-        "express": "4.18.2",
-        "ts-node-dev": "2.0.0"
+        "@prisma/client": "^6.6.0",
+        "bcryptjs": "^2.4.3",
+        "cors": "^2.8.5",
+        "dotenv": "^16.4.5",
+        "express": "^4.18.2",
+        "express-validator": "^7.0.1",
+        "jsonwebtoken": "^9.0.2",
+        "jwks-rsa": "^3.2.0"
     },
     "devDependencies": {
-        "@types/cors": "2.8.17",
-        "@types/express": "4.17.21",
-        "prisma": "6.6.0",
-        "typescript": "5.2.2"
+        "@types/bcryptjs": "^2.4.6",
+        "@types/cors": "^2.8.17",
+        "@types/express": "^4.17.21",
+        "@types/jsonwebtoken": "^9.0.5",
+        "@types/node": "^20.10.0",
+        "prisma": "^6.6.0",
+        "ts-node": "^10.9.1",
+        "ts-node-dev": "^2.0.0",
+        "typescript": "^5.2.2"
     }
 }
