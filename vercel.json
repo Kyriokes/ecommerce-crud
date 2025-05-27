@@ -23,11 +23,6 @@
             "dest": "/frontend/dist/$1"
         }
     ],
-    "functions": {
-        "backend/src/index.ts": {
-            "maxDuration": 30
-        }
-    },
     "installCommand": "npm install && cd frontend && npm install && cd ../backend && npm install",
     "buildCommand": "cd frontend && npm run build"
 }
