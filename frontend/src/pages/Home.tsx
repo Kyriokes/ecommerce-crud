@@ -3,7 +3,7 @@
 import type React from "react";
 import { Link } from "react-router-dom";
 import { Button } from "../components/ui/Button";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../hooks/useAuth";
 
 export const Home: React.FC = () => {
     const { user } = useAuth();

@@ -1,15 +1,13 @@
 "use client";
 
 import type React from "react";
+import { createContext, useState, useEffect, useCallback } from "react";
 import {
-    createContext,
-    useContext,
-    useState,
-    useEffect,
-    useCallback,
-    useRef,
-} from "react";
-import { setCurrentUser, removeAuthToken, setAuthToken } from "../utils/auth";
+    setCurrentUser,
+    removeAuthToken,
+    setAuthToken,
+    getAuthToken,
+} from "../utils/auth";
 import { authService } from "../services/authService";
 import type { User, UpdateProfileData } from "../types";
 
@@ -32,80 +30,78 @@ interface AuthContextType {
     isAuthenticated: boolean;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-// Global flag to prevent multiple initializations
-let isInitializing = false;
-let isInitialized = false;
+export const AuthContext = createContext<AuthContextType | undefined>(
+    undefined
+);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     children,
 }) => {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
-    const mountedRef = useRef(true);
+    const [initialized, setInitialized] = useState(false);
 
+    console.log("🔄 [AUTH_CONTEXT] Rendering AuthProvider:", {
+        hasUser: !!user,
+        loading,
+        initialized,
+    });
+
+    // Initialize auth only once
     useEffect(() => {
-        // Prevent multiple initializations
-        if (isInitializing || isInitialized) {
-            setLoading(false);
+        if (initialized) {
+            console.log("⏭️ [AUTH_CONTEXT] Already initialized, skipping");
             return;
         }
 
-        const initAuth = async () => {
-            isInitializing = true;
-            console.log("🔐 Initializing auth context...");
+        console.log("🔐 [AUTH_CONTEXT] Starting initialization...");
 
+        const initAuth = async () => {
             try {
-                const token = localStorage.getItem("authToken");
+                const token = getAuthToken();
+                console.log(
+                    "🎫 [AUTH_CONTEXT] Token check:",
+                    token ? "Found" : "Not found"
+                );
 
                 if (token) {
-                    console.log("🎫 Found stored token");
+                    console.log("👤 [AUTH_CONTEXT] Fetching user data...");
                     try {
-                        const freshUser = await authService.getCurrentUser();
-                        if (mountedRef.current) {
-                            console.log(
-                                "✅ Auth context initialized with user:",
-                                freshUser.username
-                            );
-                            setUser(freshUser);
-                        }
+                        const userData = await authService.getCurrentUser();
+                        console.log(
+                            "✅ [AUTH_CONTEXT] User data fetched:",
+                            userData.username
+                        );
+                        setUser(userData);
                     } catch (error) {
-                        console.error("💥 Error fetching user data:", error);
+                        console.error(
+                            "💥 [AUTH_CONTEXT] Error fetching user:",
+                            error
+                        );
                         removeAuthToken();
-                        if (mountedRef.current) {
-                            setUser(null);
-                        }
-                    }
-                } else {
-                    console.log("❌ No stored token found");
-                    if (mountedRef.current) {
                         setUser(null);
                     }
-                }
-            } catch (error) {
-                console.error("💥 Auth initialization error:", error);
-                if (mountedRef.current) {
+                } else {
+                    console.log(
+                        "❌ [AUTH_CONTEXT] No token, setting user to null"
+                    );
                     setUser(null);
                 }
+            } catch (error) {
+                console.error("💥 [AUTH_CONTEXT] Initialization error:", error);
+                setUser(null);
             } finally {
-                if (mountedRef.current) {
-                    setLoading(false);
-                }
-                isInitialized = true;
-                isInitializing = false;
+                console.log("🏁 [AUTH_CONTEXT] Initialization complete");
+                setLoading(false);
+                setInitialized(true);
             }
         };
 
         initAuth();
-
-        return () => {
-            mountedRef.current = false;
-        };
-    }, []);
+    }, [initialized]);
 
     const login = useCallback(async (username: string, password: string) => {
-        console.log("🔐 Login attempt for:", username);
+        console.log("🔐 [AUTH_CONTEXT] Login attempt for:", username);
         try {
             const { user: loggedUser, token } = await authService.login({
                 username,
@@ -115,11 +111,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
             setAuthToken(token);
             setCurrentUser({ id: loggedUser.id, email: loggedUser.email });
             setUser(loggedUser);
-            console.log("✅ Login successful, user state updated");
 
+            console.log("✅ [AUTH_CONTEXT] Login successful");
             return { success: true };
         } catch (error) {
-            console.error("💥 Login failed:", error);
+            console.error("💥 [AUTH_CONTEXT] Login failed:", error);
             return {
                 success: false,
                 error: error instanceof Error ? error.message : "Login failed",
@@ -129,7 +125,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
     const register = useCallback(
         async (username: string, email: string, password: string) => {
-            console.log("📝 Register attempt for:", username);
+            console.log("📝 [AUTH_CONTEXT] Register attempt for:", username);
             try {
                 await authService.register({
                     username,
@@ -139,17 +135,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
                 // Auto-login after registration
                 const loginResult = await login(username, password);
-                if (loginResult.success) {
-                    console.log("✅ Registration and auto-login successful");
-                    return { success: true };
-                } else {
-                    return {
-                        success: false,
-                        error: "Registration successful but auto-login failed",
-                    };
-                }
+                return loginResult;
             } catch (error) {
-                console.error("💥 Registration failed:", error);
+                console.error("💥 [AUTH_CONTEXT] Registration failed:", error);
                 return {
                     success: false,
                     error:
@@ -164,19 +152,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
     const updateProfile = useCallback(
         async (data: UpdateProfileData) => {
-            if (!user) return { success: false, error: "No user logged in" };
+            if (!user) {
+                return { success: false, error: "No user logged in" };
+            }
 
-            console.log("📝 Updating profile for:", user.username);
+            console.log(
+                "📝 [AUTH_CONTEXT] Updating profile for:",
+                user.username
+            );
             try {
                 const updatedUser = await authService.updateProfile(
                     user.id,
                     data
                 );
                 setUser(updatedUser);
-                console.log("✅ Profile updated successfully");
+                console.log("✅ [AUTH_CONTEXT] Profile updated successfully");
                 return { success: true };
             } catch (error) {
-                console.error("💥 Profile update failed:", error);
+                console.error(
+                    "💥 [AUTH_CONTEXT] Profile update failed:",
+                    error
+                );
                 return {
                     success: false,
                     error:
@@ -190,16 +186,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     );
 
     const logout = useCallback(() => {
-        console.log("🚪 Logging out");
+        console.log("🚪 [AUTH_CONTEXT] Logout initiated");
         removeAuthToken();
         authService.clearCache();
         setUser(null);
-
-        // Reset global flags for re-initialization if needed
-        isInitialized = false;
-        isInitializing = false;
-
-        console.log("✅ Logout completed, user state cleared");
+        console.log("✅ [AUTH_CONTEXT] Logout completed");
     }, []);
 
     const value = {
@@ -215,12 +206,4 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     return (
         <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
     );
-};
-
-export const useAuth = () => {
-    const context = useContext(AuthContext);
-    if (context === undefined) {
-        throw new Error("useAuth must be used within an AuthProvider");
-    }
-    return context;
 };

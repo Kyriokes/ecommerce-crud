@@ -7,7 +7,8 @@ import {
     Route,
     Navigate,
 } from "react-router-dom";
-import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { AuthProvider } from "./contexts/AuthContext";
+import { useAuth } from "./hooks/useAuth";
 import { Navbar } from "./components/Navbar";
 import { Home } from "./pages/Home";
 import { Products } from "./pages/Products";
@@ -17,82 +18,44 @@ import { Register } from "./pages/Register";
 import { Profile } from "./pages/Profile";
 import { Admin } from "./pages/Admin";
 
-const AppContent: React.FC = () => {
-    return (
-        <Router>
-            <div className="min-h-screen bg-gray-50">
-                <Navbar />
-                <Routes>
-                    <Route path="/" element={<Home />} />
-                    <Route path="/products" element={<Products />} />
-                    <Route
-                        path="/cart"
-                        element={
-                            <ProtectedRoute>
-                                <Cart />
-                            </ProtectedRoute>
-                        }
-                    />
-                    <Route
-                        path="/profile"
-                        element={
-                            <ProtectedRoute>
-                                <Profile />
-                            </ProtectedRoute>
-                        }
-                    />
-                    <Route
-                        path="/admin"
-                        element={
-                            <ProtectedRoute>
-                                <Admin />
-                            </ProtectedRoute>
-                        }
-                    />
-                    <Route
-                        path="/login"
-                        element={
-                            <PublicRoute>
-                                <Login />
-                            </PublicRoute>
-                        }
-                    />
-                    <Route
-                        path="/register"
-                        element={
-                            <PublicRoute>
-                                <Register />
-                            </PublicRoute>
-                        }
-                    />
-                </Routes>
-            </div>
-        </Router>
-    );
-};
-
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
     children,
 }) => {
     const { isAuthenticated, loading } = useAuth();
 
+    console.log("🛡️ [PROTECTED_ROUTE] Auth state:", {
+        isAuthenticated,
+        loading,
+    });
+
     if (loading) {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-                    <p className="text-gray-600">Cargando...</p>
+                    <p className="text-gray-600">
+                        Verificando autenticación...
+                    </p>
                 </div>
             </div>
         );
     }
 
-    return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
+    if (!isAuthenticated) {
+        console.log(
+            "🚫 [PROTECTED_ROUTE] Not authenticated, redirecting to login"
+        );
+        return <Navigate to="/login" replace />;
+    }
+
+    return <>{children}</>;
 };
 
 const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { isAuthenticated, loading } = useAuth();
 
+    console.log("🌐 [PUBLIC_ROUTE] Auth state:", { isAuthenticated, loading });
+
     if (loading) {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -104,14 +67,79 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         );
     }
 
-    return !isAuthenticated ? <>{children}</> : <Navigate to="/" replace />;
+    if (isAuthenticated) {
+        console.log(
+            "✅ [PUBLIC_ROUTE] Already authenticated, redirecting to home"
+        );
+        return <Navigate to="/" replace />;
+    }
+
+    return <>{children}</>;
+};
+
+const AppContent: React.FC = () => {
+    console.log("🏠 [APP] Rendering AppContent");
+
+    return (
+        <div className="min-h-screen bg-gray-50">
+            <Navbar />
+            <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/products" element={<Products />} />
+                <Route
+                    path="/cart"
+                    element={
+                        <ProtectedRoute>
+                            <Cart />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/profile"
+                    element={
+                        <ProtectedRoute>
+                            <Profile />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/admin"
+                    element={
+                        <ProtectedRoute>
+                            <Admin />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/login"
+                    element={
+                        <PublicRoute>
+                            <Login />
+                        </PublicRoute>
+                    }
+                />
+                <Route
+                    path="/register"
+                    element={
+                        <PublicRoute>
+                            <Register />
+                        </PublicRoute>
+                    }
+                />
+            </Routes>
+        </div>
+    );
 };
 
 const App: React.FC = () => {
+    console.log("🚀 [APP] Rendering App");
+
     return (
-        <AuthProvider>
-            <AppContent />
-        </AuthProvider>
+        <Router>
+            <AuthProvider>
+                <AppContent />
+            </AuthProvider>
+        </Router>
     );
 };
 

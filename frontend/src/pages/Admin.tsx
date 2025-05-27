@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../hooks/useAuth";
 import { Button } from "../components/ui/Button";
 
 export const Admin: React.FC = () => {

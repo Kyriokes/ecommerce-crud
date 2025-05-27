@@ -1,33 +1,48 @@
 "use client";
 
 import type React from "react";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth";
 import { cartService } from "../services/cartService";
-import type { CartItem } from "../types";
 import { Button } from "../components/ui/Button";
 import { Alert } from "../components/ui/Alert";
+import type { CartItem } from "../types";
 
 export const Cart: React.FC = () => {
+    const { user } = useAuth();
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const [updatingItems, setUpdatingItems] = useState<Set<number>>(new Set());
+    const [updating, setUpdating] = useState<number | null>(null);
+    const [alert, setAlert] = useState<{
+        type: "success" | "error";
+        message: string;
+    } | null>(null);
+
+    console.log(
+        "🛒 [CART] Rendering with user:",
+        user ? `${user.username} (ID: ${user.id})` : "null"
+    );
 
     useEffect(() => {
-        loadCart();
-    }, []);
+        if (user) {
+            loadCart();
+        }
+    }, [user]);
 
     const loadCart = async () => {
         try {
             setLoading(true);
-            const data = await cartService.getCart();
-            setCartItems(data);
+            console.log("🛒 [CART] Loading cart items...");
+            const items = await cartService.getCart();
+            console.log("🛒 [CART] Cart items loaded:", items.length);
+            setCartItems(items);
         } catch (error) {
-            setError(
-                error instanceof Error
-                    ? error.message
-                    : "Error al cargar el carrito"
-            );
+            console.error("💥 [CART] Error loading cart:", error);
+            setAlert({
+                type: "error",
+                message: "Error al cargar el carrito",
+            });
         } finally {
             setLoading(false);
         }
@@ -36,8 +51,14 @@ export const Cart: React.FC = () => {
     const updateQuantity = async (itemId: number, newQuantity: number) => {
         if (newQuantity < 1) return;
 
-        setUpdatingItems((prev) => new Set(prev).add(itemId));
         try {
+            setUpdating(itemId);
+            console.log(
+                "🛒 [CART] Updating quantity:",
+                itemId,
+                "to",
+                newQuantity
+            );
             await cartService.updateCartItem(itemId, newQuantity);
             setCartItems((prev) =>
                 prev.map((item) =>
@@ -46,45 +67,64 @@ export const Cart: React.FC = () => {
                         : item
                 )
             );
-        } catch (error) {
-            setError(
-                error instanceof Error
-                    ? error.message
-                    : "Error al actualizar cantidad"
-            );
-        } finally {
-            setUpdatingItems((prev) => {
-                const newSet = new Set(prev);
-                newSet.delete(itemId);
-                return newSet;
+            setAlert({
+                type: "success",
+                message: "Cantidad actualizada",
             });
+        } catch (error) {
+            console.error("💥 [CART] Error updating quantity:", error);
+            setAlert({
+                type: "error",
+                message: "Error al actualizar cantidad",
+            });
+        } finally {
+            setUpdating(null);
         }
     };
 
     const removeItem = async (itemId: number) => {
-        setUpdatingItems((prev) => new Set(prev).add(itemId));
         try {
+            setUpdating(itemId);
+            console.log("🛒 [CART] Removing item:", itemId);
             await cartService.removeFromCart(itemId);
             setCartItems((prev) => prev.filter((item) => item.id !== itemId));
-        } catch (error) {
-            setError(
-                error instanceof Error
-                    ? error.message
-                    : "Error al eliminar producto"
-            );
-        } finally {
-            setUpdatingItems((prev) => {
-                const newSet = new Set(prev);
-                newSet.delete(itemId);
-                return newSet;
+            setAlert({
+                type: "success",
+                message: "Producto eliminado del carrito",
             });
+        } catch (error) {
+            console.error("💥 [CART] Error removing item:", error);
+            setAlert({
+                type: "error",
+                message: "Error al eliminar producto",
+            });
+        } finally {
+            setUpdating(null);
         }
     };
 
-    const total = cartItems.reduce(
-        (sum, item) => sum + item.product.price * item.quantity,
-        0
-    );
+    const calculateTotal = () => {
+        return cartItems.reduce(
+            (total, item) => total + item.product.price * item.quantity,
+            0
+        );
+    };
+
+    if (!user) {
+        console.log("❌ [CART] No user, redirecting to login");
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-center">
+                    <p className="text-gray-600">
+                        Debes iniciar sesión para ver tu carrito
+                    </p>
+                    <Link to="/login" className="mt-4 inline-block">
+                        <Button>Iniciar Sesión</Button>
+                    </Link>
+                </div>
+            </div>
+        );
+    }
 
     if (loading) {
         return (
@@ -99,205 +139,312 @@ export const Cart: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-gray-50">
-            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <h1 className="text-3xl font-bold text-gray-900 mb-8">
-                    Tu Carrito
-                </h1>
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <div className="mb-8">
+                    <h1 className="text-3xl font-bold text-gray-900">
+                        Mi Carrito
+                    </h1>
+                    <p className="text-gray-600">
+                        Revisa y gestiona los productos en tu carrito
+                    </p>
+                </div>
 
-                {error && (
+                {alert && (
                     <div className="mb-6">
                         <Alert
-                            type="error"
-                            message={error}
-                            onClose={() => setError(null)}
+                            type={alert.type}
+                            message={alert.message}
+                            onClose={() => setAlert(null)}
                         />
                     </div>
                 )}
 
                 {cartItems.length === 0 ? (
-                    <div className="text-center py-12 bg-white rounded-lg shadow">
-                        <svg
-                            className="w-12 h-12 text-gray-400 mx-auto mb-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.5 6M7 13l-1.5-6m0 0L4 5M7 13h10M17 21a2 2 0 100-4 2 2 0 000 4zM9 21a2 2 0 100-4 2 2 0 000 4z"
-                            />
-                        </svg>
-                        <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    <div className="bg-white rounded-lg shadow-md p-8 text-center">
+                        <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <svg
+                                className="w-12 h-12 text-gray-400"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.5 6M7 13l-1.5-6m0 0L4 5M7 13h10M17 21a2 2 0 100-4 2 2 0 000 4zM9 21a2 2 0 100-4 2 2 0 000 4z"
+                                />
+                            </svg>
+                        </div>
+                        <h2 className="text-2xl font-semibold text-gray-900 mb-4">
                             Tu carrito está vacío
-                        </h3>
-                        <p className="text-gray-600 mb-6">
-                            Agrega algunos productos para comenzar tu compra.
+                        </h2>
+                        <p className="text-gray-600 mb-8">
+                            ¡Agrega algunos productos increíbles a tu carrito!
                         </p>
-                        <Button
-                            onClick={() => (window.location.href = "/products")}
-                        >
-                            Explorar Productos
-                        </Button>
+                        <Link to="/products">
+                            <Button
+                                size="lg"
+                                onClick={() =>
+                                    console.log(
+                                        "🛒 [CART] Explore products button clicked"
+                                    )
+                                }
+                            >
+                                Explorar Productos
+                            </Button>
+                        </Link>
                     </div>
                 ) : (
-                    <div className="bg-white rounded-lg shadow overflow-hidden">
-                        <div className="px-6 py-4 border-b border-gray-200">
-                            <h2 className="text-lg font-medium text-gray-900">
-                                {cartItems.length}{" "}
-                                {cartItems.length === 1
-                                    ? "producto"
-                                    : "productos"}{" "}
-                                en tu carrito
-                            </h2>
-                        </div>
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        {/* Cart Items */}
+                        <div className="lg:col-span-2">
+                            <div className="bg-white rounded-lg shadow-md">
+                                <div className="px-6 py-4 border-b border-gray-200">
+                                    <h2 className="text-lg font-semibold text-gray-900">
+                                        Productos ({cartItems.length}{" "}
+                                        {cartItems.length === 1
+                                            ? "artículo"
+                                            : "artículos"}
+                                        )
+                                    </h2>
+                                </div>
 
-                        <div className="divide-y divide-gray-200">
-                            {cartItems.map((item) => (
-                                <div
-                                    key={item.id}
-                                    className="p-6 flex items-center space-x-4"
-                                >
-                                    <div className="flex-shrink-0 w-20 h-20 bg-gray-200 rounded-lg overflow-hidden">
-                                        {item.product.imageUrl ? (
-                                            <img
-                                                src={
-                                                    item.product.imageUrl ||
-                                                    "/placeholder.svg"
-                                                }
-                                                alt={item.product.name}
-                                                className="w-full h-full object-cover"
-                                            />
-                                        ) : (
-                                            <div className="w-full h-full bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center">
-                                                <svg
-                                                    className="w-8 h-8 text-gray-400"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    viewBox="0 0 24 24"
-                                                >
-                                                    <path
-                                                        strokeLinecap="round"
-                                                        strokeLinejoin="round"
-                                                        strokeWidth={2}
-                                                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                <div className="divide-y divide-gray-200">
+                                    {cartItems.map((item) => (
+                                        <div key={item.id} className="p-6">
+                                            <div className="flex items-center space-x-4">
+                                                <div className="flex-shrink-0">
+                                                    <img
+                                                        className="w-20 h-20 object-cover rounded-lg"
+                                                        src={
+                                                            item.product
+                                                                .imageUrl ||
+                                                            "/placeholder.svg?height=80&width=80"
+                                                        }
+                                                        alt={item.product.name}
                                                     />
-                                                </svg>
+                                                </div>
+
+                                                <div className="flex-1 min-w-0">
+                                                    <h3 className="text-lg font-medium text-gray-900">
+                                                        {item.product.name}
+                                                    </h3>
+                                                    {item.product
+                                                        .description && (
+                                                        <p className="text-sm text-gray-500 mt-1">
+                                                            {
+                                                                item.product
+                                                                    .description
+                                                            }
+                                                        </p>
+                                                    )}
+                                                    <p className="text-lg font-semibold text-indigo-600 mt-2">
+                                                        $
+                                                        {item.product.price.toFixed(
+                                                            2
+                                                        )}
+                                                    </p>
+                                                </div>
+
+                                                <div className="flex items-center space-x-3">
+                                                    <div className="flex items-center border border-gray-300 rounded-md">
+                                                        <button
+                                                            onClick={() =>
+                                                                updateQuantity(
+                                                                    item.id,
+                                                                    item.quantity -
+                                                                        1
+                                                                )
+                                                            }
+                                                            disabled={
+                                                                updating ===
+                                                                    item.id ||
+                                                                item.quantity <=
+                                                                    1
+                                                            }
+                                                            className="p-2 text-gray-400 hover:text-gray-600 disabled:opacity-50"
+                                                        >
+                                                            <svg
+                                                                className="w-4 h-4"
+                                                                fill="none"
+                                                                stroke="currentColor"
+                                                                viewBox="0 0 24 24"
+                                                            >
+                                                                <path
+                                                                    strokeLinecap="round"
+                                                                    strokeLinejoin="round"
+                                                                    strokeWidth={
+                                                                        2
+                                                                    }
+                                                                    d="M20 12H4"
+                                                                />
+                                                            </svg>
+                                                        </button>
+                                                        <span className="px-4 py-2 text-gray-900 font-medium">
+                                                            {item.quantity}
+                                                        </span>
+                                                        <button
+                                                            onClick={() =>
+                                                                updateQuantity(
+                                                                    item.id,
+                                                                    item.quantity +
+                                                                        1
+                                                                )
+                                                            }
+                                                            disabled={
+                                                                updating ===
+                                                                    item.id ||
+                                                                item.quantity >=
+                                                                    item.product
+                                                                        .stock
+                                                            }
+                                                            className="p-2 text-gray-400 hover:text-gray-600 disabled:opacity-50"
+                                                        >
+                                                            <svg
+                                                                className="w-4 h-4"
+                                                                fill="none"
+                                                                stroke="currentColor"
+                                                                viewBox="0 0 24 24"
+                                                            >
+                                                                <path
+                                                                    strokeLinecap="round"
+                                                                    strokeLinejoin="round"
+                                                                    strokeWidth={
+                                                                        2
+                                                                    }
+                                                                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                                                                />
+                                                            </svg>
+                                                        </button>
+                                                    </div>
+
+                                                    <button
+                                                        onClick={() =>
+                                                            removeItem(item.id)
+                                                        }
+                                                        disabled={
+                                                            updating === item.id
+                                                        }
+                                                        className="p-2 text-red-400 hover:text-red-600 disabled:opacity-50"
+                                                    >
+                                                        <svg
+                                                            className="w-5 h-5"
+                                                            fill="none"
+                                                            stroke="currentColor"
+                                                            viewBox="0 0 24 24"
+                                                        >
+                                                            <path
+                                                                strokeLinecap="round"
+                                                                strokeLinejoin="round"
+                                                                strokeWidth={2}
+                                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                                            />
+                                                        </svg>
+                                                    </button>
+                                                </div>
                                             </div>
-                                        )}
-                                    </div>
 
-                                    <div className="flex-1 min-w-0">
-                                        <h3 className="text-lg font-medium text-gray-900">
-                                            {item.product.name}
-                                        </h3>
-                                        {item.product.description && (
-                                            <p className="text-sm text-gray-600 mt-1">
-                                                {item.product.description}
-                                            </p>
-                                        )}
-                                        <p className="text-lg font-semibold text-indigo-600 mt-2">
-                                            ${item.product.price.toFixed(2)}
-                                        </p>
-                                    </div>
-
-                                    <div className="flex items-center space-x-3">
-                                        <button
-                                            onClick={() =>
-                                                updateQuantity(
-                                                    item.id,
-                                                    item.quantity - 1
-                                                )
-                                            }
-                                            disabled={
-                                                item.quantity <= 1 ||
-                                                updatingItems.has(item.id)
-                                            }
-                                            className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                                        >
-                                            <svg
-                                                className="w-4 h-4"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <path
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth={2}
-                                                    d="M20 12H4"
-                                                />
-                                            </svg>
-                                        </button>
-
-                                        <span className="w-12 text-center font-medium text-gray-900">
-                                            {item.quantity}
-                                        </span>
-
-                                        <button
-                                            onClick={() =>
-                                                updateQuantity(
-                                                    item.id,
-                                                    item.quantity + 1
-                                                )
-                                            }
-                                            disabled={updatingItems.has(
-                                                item.id
+                                            {item.quantity >=
+                                                item.product.stock && (
+                                                <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                                                    <p className="text-sm text-yellow-800">
+                                                        Stock limitado: Solo
+                                                        quedan{" "}
+                                                        {item.product.stock}{" "}
+                                                        unidades disponibles
+                                                    </p>
+                                                </div>
                                             )}
-                                            className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                                        >
-                                            <svg
-                                                className="w-4 h-4"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <path
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth={2}
-                                                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                                                />
-                                            </svg>
-                                        </button>
-                                    </div>
-
-                                    <div className="text-right">
-                                        <p className="text-lg font-semibold text-gray-900">
-                                            $
-                                            {(
-                                                item.product.price *
-                                                item.quantity
-                                            ).toFixed(2)}
-                                        </p>
-                                        <Button
-                                            variant="danger"
-                                            size="sm"
-                                            onClick={() => removeItem(item.id)}
-                                            loading={updatingItems.has(item.id)}
-                                            className="mt-2"
-                                        >
-                                            Eliminar
-                                        </Button>
-                                    </div>
+                                        </div>
+                                    ))}
                                 </div>
-                            ))}
+                            </div>
                         </div>
 
-                        <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
-                            <div className="flex justify-between items-center">
-                                <div>
-                                    <p className="text-lg font-medium text-gray-900">
-                                        Total: ${total.toFixed(2)}
-                                    </p>
-                                    <p className="text-sm text-gray-600">
-                                        Envío calculado en el checkout
-                                    </p>
+                        {/* Order Summary */}
+                        <div className="lg:col-span-1">
+                            <div className="bg-white rounded-lg shadow-md p-6 sticky top-8">
+                                <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                                    Resumen del Pedido
+                                </h2>
+
+                                <div className="space-y-3">
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-gray-600">
+                                            Subtotal
+                                        </span>
+                                        <span className="text-gray-900">
+                                            ${calculateTotal().toFixed(2)}
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-gray-600">
+                                            Envío
+                                        </span>
+                                        <span className="text-gray-900">
+                                            Gratis
+                                        </span>
+                                    </div>
+                                    <div className="border-t border-gray-200 pt-3">
+                                        <div className="flex justify-between text-lg font-semibold">
+                                            <span className="text-gray-900">
+                                                Total
+                                            </span>
+                                            <span className="text-indigo-600">
+                                                ${calculateTotal().toFixed(2)}
+                                            </span>
+                                        </div>
+                                    </div>
                                 </div>
-                                <Button size="lg" className="ml-4">
-                                    Proceder al Pago
-                                </Button>
+
+                                <div className="mt-6 space-y-3">
+                                    <Button
+                                        className="w-full"
+                                        size="lg"
+                                        disabled
+                                    >
+                                        Proceder al Pago
+                                        <span className="text-xs block mt-1">
+                                            (Próximamente)
+                                        </span>
+                                    </Button>
+                                    <Link to="/products" className="block">
+                                        <Button
+                                            variant="outline"
+                                            className="w-full"
+                                        >
+                                            Continuar Comprando
+                                        </Button>
+                                    </Link>
+                                </div>
+
+                                <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-md">
+                                    <div className="flex items-start">
+                                        <svg
+                                            className="w-5 h-5 text-green-400 mt-0.5 mr-3"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M5 13l4 4L19 7"
+                                            />
+                                        </svg>
+                                        <div>
+                                            <h4 className="text-sm font-medium text-green-900">
+                                                Envío Gratis
+                                            </h4>
+                                            <p className="text-sm text-green-700 mt-1">
+                                                Tu pedido califica para envío
+                                                gratuito
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

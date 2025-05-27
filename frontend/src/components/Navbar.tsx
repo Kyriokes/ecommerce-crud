@@ -2,13 +2,20 @@
 
 import type React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../hooks/useAuth";
 import { UserMenu } from "./UserMenu";
 import { Button } from "./ui/Button";
 
 export const Navbar: React.FC = () => {
-    const { isAuthenticated, loading } = useAuth();
+    const { isAuthenticated, loading, user } = useAuth();
     const location = useLocation();
+
+    console.log("🧭 [NAVBAR] Rendering with auth state:", {
+        isAuthenticated,
+        loading,
+        hasUser: !!user,
+        pathname: location.pathname,
+    });
 
     const isActive = (path: string) => location.pathname === path;
 
@@ -57,11 +64,16 @@ export const Navbar: React.FC = () => {
 
                     <div className="flex items-center space-x-4">
                         {loading ? (
-                            <div className="w-8 h-8 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
-                        ) : isAuthenticated ? (
+                            <div className="flex items-center space-x-2">
+                                <div className="w-6 h-6 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                                <span className="text-white text-sm">
+                                    Cargando...
+                                </span>
+                            </div>
+                        ) : isAuthenticated && user ? (
                             <UserMenu />
                         ) : (
-                            <>
+                            <div className="flex items-center space-x-2">
                                 <Link to="/login">
                                     <Button
                                         variant="outline"
@@ -80,7 +92,7 @@ export const Navbar: React.FC = () => {
                                         Registrarse
                                     </Button>
                                 </Link>
-                            </>
+                            </div>
                         )}
                     </div>
                 </div>

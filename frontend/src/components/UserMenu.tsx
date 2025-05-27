@@ -3,13 +3,18 @@
 import type React from "react";
 import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../hooks/useAuth";
 
 export const UserMenu: React.FC = () => {
     const [isOpen, setIsOpen] = useState(false);
     const { user, logout } = useAuth();
     const menuRef = useRef<HTMLDivElement>(null);
     const navigate = useNavigate();
+
+    console.log(
+        "👤 [USER_MENU] Rendering with user:",
+        user ? `${user.username} (ID: ${user.id})` : "null"
+    );
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -26,22 +31,33 @@ export const UserMenu: React.FC = () => {
             document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    if (!user) return null;
+    if (!user) {
+        console.log("❌ [USER_MENU] No user, not rendering menu");
+        return null;
+    }
 
     const handleLogout = () => {
+        console.log("🚪 [USER_MENU] Logout button clicked");
         logout();
         setIsOpen(false);
         navigate("/");
     };
 
     const handleMenuClick = () => {
+        console.log("📱 [USER_MENU] Menu item clicked, closing menu");
         setIsOpen(false);
     };
 
     return (
         <div className="relative" ref={menuRef}>
             <button
-                onClick={() => setIsOpen(!isOpen)}
+                onClick={() => {
+                    console.log(
+                        "🔘 [USER_MENU] Menu button clicked, current state:",
+                        isOpen
+                    );
+                    setIsOpen(!isOpen);
+                }}
                 className="flex items-center space-x-2 text-indigo-100 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-indigo-600 rounded-md px-3 py-2"
             >
                 <div className="w-8 h-8 bg-indigo-500 rounded-full flex items-center justify-center">
