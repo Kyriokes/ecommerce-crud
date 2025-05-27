@@ -109,3 +109,5 @@ app.listen(PORT, () => {
     console.log(`🏥 Health Check: http://localhost:${PORT}/health`);
     console.log(`🔐 Auth endpoints: http://localhost:${PORT}/api/auth`);
 });
+
+export default app;
