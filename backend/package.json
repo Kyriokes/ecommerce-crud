@@ -1,7 +1,7 @@
 {
     "name": "ecommerce-backend",
     "version": "1.0.0",
-    "description": "Backend API for ecommerce application with authentication and cart management",
+    "description": "Backend API for ecommerce application",
     "main": "dist/index.js",
     "scripts": {
         "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
@@ -12,19 +12,9 @@
         "db:generate": "prisma generate",
         "db:studio": "prisma studio",
         "db:reset": "prisma migrate reset",
-        "lint": "eslint src/**/*.ts",
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "postinstall": "prisma generate",
+        "vercel-build": "prisma generate && npm run build"
     },
-    "keywords": [
-        "ecommerce",
-        "api",
-        "nodejs",
-        "express",
-        "prisma",
-        "typescript"
-    ],
-    "author": "Sergio Ferrari Bryce",
-    "license": "MIT",
     "dependencies": {
         "@prisma/client": "^6.6.0",
         "bcryptjs": "^2.4.3",

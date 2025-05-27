@@ -5,7 +5,7 @@
             "src": "frontend/package.json",
             "use": "@vercel/static-build",
             "config": {
-                "distDir": "dist"
+                "distDir": "frontend/dist"
             }
         },
         {
@@ -20,9 +20,14 @@
         },
         {
             "src": "/(.*)",
-            "dest": "/$1"
+            "dest": "/frontend/dist/$1"
         }
     ],
-    "installCommand": "npm install && cd frontend && npm install && cd ../backend && npm install",
+    "functions": {
+        "backend/src/index.ts": {
+            "maxDuration": 30
+        }
+    },
+    "installCommand": "npm install && cd frontend && npm install && cd ../backend && npm install && cd backend && npx prisma generate",
     "buildCommand": "cd frontend && npm run build"
 }
