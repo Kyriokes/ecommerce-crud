@@ -1,209 +1,264 @@
-# Ecommerce Backend API
+# 🛍️ EcoShop - Frontend
 
-Backend API para aplicación de ecommerce construida con Node.js, Express, Prisma y PostgreSQL, con autenticación via Supabase.
+Una aplicación de ecommerce moderna construida con React, TypeScript y Vite. Interfaz de usuario elegante y responsiva para una experiencia de compra excepcional.
 
-## 🚀 Características
+## ✨ Características
 
-- **Autenticación**: Integración con Supabase Auth (JWT)
-- **Base de datos**: PostgreSQL con Prisma ORM
-- **Seguridad**: Hash de contraseñas con bcrypt
-- **Validaciones**: Validación completa de datos de entrada
-- **CORS**: Configurado para desarrollo y producción
-- **TypeScript**: Tipado estático completo
+- 🔐 **Autenticación completa** - Login, registro y gestión de perfiles
+- 🛒 **Carrito de compras** - Agregar, editar y eliminar productos
+- 📱 **Diseño responsivo** - Optimizado para móviles y desktop
+- 🎨 **UI moderna** - Componentes reutilizables con Tailwind CSS
+- 👤 **Gestión de usuarios** - Perfiles y roles de administrador
+- 🔍 **Búsqueda y filtros** - Encuentra productos fácilmente
+- ⚡ **Rendimiento optimizado** - Carga rápida y navegación fluida
 
-## 📋 Requisitos Previos
+## 🚀 Tecnologías
 
-- Node.js (v18 o superior)
-- PostgreSQL
-- Cuenta de Supabase
+- **React 18** - Biblioteca de UI con hooks modernos
+- **TypeScript** - Tipado estático para mejor desarrollo
+- **Vite** - Build tool rápido y moderno
+- **React Router** - Navegación del lado del cliente
+- **Tailwind CSS** - Framework de CSS utility-first
+- **Fetch API** - Cliente HTTP nativo
 
-## 🛠️ Instalación
+## 📦 Instalación
 
-1. **Clonar el repositorio**
-\`\`\`bash
-git clone <repository-url>
-cd ecommerce-crud/backend
-\`\`\`
+### Prerrequisitos
 
-2. **Instalar dependencias**
-\`\`\`bash
-npm install
-\`\`\`
+- Node.js 18+ 
+- npm o yarn
+- Backend API ejecutándose (ver repositorio backend)
 
-3. **Configurar variables de entorno**
-\`\`\`bash
-cp .env.example .env
-\`\`\`
+### Pasos de instalación
 
-Editar \`.env\` con tus valores:
-\`\`\`env
-DATABASE_URL="postgresql://username:password@localhost:5432/ecommerce_db"
-SUPABASE_URL="https://your-project.supabase.co"
-PORT=3000
-NODE_ENV=development
-FRONTEND_URL="http://localhost:5173"
-\`\`\`
+1. **Clona el repositorio**
+   \`\`\`bash
+   git clone <repository-url>
+   cd ecommerce-frontend
+   \`\`\`
 
-4. **Configurar base de datos**
-\`\`\`bash
-# Generar cliente Prisma
-npm run db:generate
+2. **Instala las dependencias**
+   \`\`\`bash
+   npm install
+   \`\`\`
 
-# Ejecutar migraciones
-npm run db:migrate
+3. **Configura las variables de entorno**
+   \`\`\`bash
+   cp .env.example .env
+   \`\`\`
 
-# (Opcional) Poblar con datos de prueba
-npm run seed
-\`\`\`
+4. **Edita el archivo .env**
+   \`\`\`env
+   VITE_API_URL=http://localhost:3000
+   \`\`\`
 
-## 🚀 Uso
+5. **Inicia el servidor de desarrollo**
+   \`\`\`bash
+   npm run dev
+   \`\`\`
 
-### Desarrollo
-\`\`\`bash
-npm run dev
-\`\`\`
-
-### Producción
-\`\`\`bash
-npm run build
-npm start
-\`\`\`
-
-## 📚 API Endpoints
-
-### Autenticación
-Todas las rutas protegidas requieren header:
-\`\`\`
-Authorization: Bearer <supabase-jwt-token>
-\`\`\`
-
-### Productos
-- \`GET /api/products\` - Listar productos (público)
-- \`GET /api/products/:id\` - Obtener producto (público)
-- \`POST /api/products\` - Crear producto (protegido)
-- \`PUT /api/products/:id\` - Actualizar producto (protegido)
-- \`DELETE /api/products/:id\` - Eliminar producto (protegido)
-
-### Usuarios
-- \`POST /api/users\` - Registrar usuario (público)
-- \`GET /api/users\` - Listar usuarios (protegido)
-- \`GET /api/users/:id\` - Obtener usuario (protegido)
-- \`PUT /api/users/:id\` - Actualizar usuario (protegido)
-- \`DELETE /api/users/:id\` - Eliminar usuario (protegido)
-
-### Carrito
-- \`GET /api/cart\` - Obtener carrito del usuario (protegido)
-- \`POST /api/cart\` - Agregar al carrito (protegido)
-- \`PUT /api/cart/:id\` - Actualizar cantidad (protegido)
-- \`DELETE /api/cart/:id\` - Eliminar del carrito (protegido)
-
-## 🗄️ Esquema de Base de Datos
-
-### Modelos principales:
-- **User**: Usuarios del sistema
-- **Product**: Productos del catálogo
-- **Cart**: Items en el carrito de compras
-- **Order**: Órdenes de compra
-- **OrderItem**: Items de las órdenes
+6. **Abre tu navegador**
+   \`\`\`
+   http://localhost:5173
+   \`\`\`
 
 ## 🔧 Scripts Disponibles
 
-- \`npm run dev\` - Servidor de desarrollo
-- \`npm run build\` - Compilar TypeScript
-- \`npm start\` - Ejecutar en producción
-- \`npm run db:migrate\` - Ejecutar migraciones
-- \`npm run db:generate\` - Generar cliente Prisma
-- \`npm run db:studio\` - Abrir Prisma Studio
-- \`npm run seed\` - Poblar base de datos
-
-## 🛡️ Seguridad
-
-- Contraseñas hasheadas con bcrypt (salt rounds: 12)
-- Validación JWT con Supabase
-- Validación de entrada en todos los endpoints
-- CORS configurado
-- Variables de entorno para datos sensibles
-
-## 📝 Ejemplos de Uso
-
-### Crear un producto
 \`\`\`bash
-curl -X POST http://localhost:3000/api/products \\
-  -H "Content-Type: application/json" \\
-  -H "Authorization: Bearer <token>" \\
-  -d '{
-    "name": "Laptop Gaming",
-    "description": "Laptop para gaming de alta gama",
-    "price": 1299.99,
-    "stock": 10,
-    "category": "Electronics"
-  }'
+# Desarrollo
+npm run dev          # Inicia el servidor de desarrollo
+npm run build        # Construye para producción
+npm run preview      # Vista previa de la build de producción
+npm run lint         # Ejecuta ESLint
+npm run type-check   # Verifica tipos de TypeScript
 \`\`\`
 
-### Agregar al carrito
-\`\`\`bash
-curl -X POST http://localhost:3000/api/cart \\
-  -H "Content-Type: application/json" \\
-  -H "Authorization: Bearer <token>" \\
-  -d '{
-    "productId": 1,
-    "quantity": 2
-  }'
+## 📁 Estructura del Proyecto
+
 \`\`\`
+src/
+├── components/          # Componentes reutilizables
+│   ├── ui/             # Componentes base (Button, Input, etc.)
+│   ├── Navbar.tsx      # Barra de navegación
+│   ├── ProductCard.tsx # Tarjeta de producto
+│   └── UserMenu.tsx    # Menú de usuario
+├── contexts/           # Contextos de React
+│   └── AuthContext.tsx # Contexto de autenticación
+├── hooks/              # Hooks personalizados
+│   └── useAuth.ts      # Hook de autenticación
+├── pages/              # Páginas de la aplicación
+│   ├── Home.tsx        # Página principal
+│   ├── Products.tsx    # Lista de productos
+│   ├── Cart.tsx        # Carrito de compras
+│   ├── Login.tsx       # Inicio de sesión
+│   ├── Register.tsx    # Registro
+│   ├── Profile.tsx     # Perfil de usuario
+│   └── Admin.tsx       # Panel de administración
+├── services/           # Servicios de API
+│   ├── authService.ts  # Servicio de autenticación
+│   └── cartService.ts  # Servicio del carrito
+├── types/              # Definiciones de tipos
+│   └── index.ts        # Tipos principales
+├── utils/              # Utilidades
+│   ├── api.ts          # Cliente de API
+│   └── auth.ts         # Utilidades de autenticación
+├── App.tsx             # Componente principal
+└── main.tsx            # Punto de entrada
+\`\`\`
+
+## 🔐 Autenticación
+
+La aplicación utiliza un sistema de autenticación basado en tokens JWT:
+
+- **Registro**: Crear nueva cuenta de usuario
+- **Login**: Iniciar sesión con credenciales
+- **Logout**: Cerrar sesión y limpiar tokens
+- **Protección de rutas**: Rutas protegidas para usuarios autenticados
+- **Roles**: Soporte para usuarios administradores
+
+## 🛒 Funcionalidades del Carrito
+
+- Agregar productos al carrito
+- Actualizar cantidades
+- Eliminar productos
+- Cálculo automático de totales
+- Persistencia durante la sesión
+
+## 🎨 Componentes UI
+
+### Componentes Base
+- \`Button\` - Botones con variantes y tamaños
+- \`Input\` - Campos de entrada con validación
+- \`Alert\` - Mensajes de notificación
+
+### Componentes de Negocio
+- \`ProductCard\` - Tarjeta de producto con imagen y acciones
+- \`Navbar\` - Navegación principal con autenticación
+- \`UserMenu\` - Menú desplegable del usuario
+
+## 🌐 Variables de Entorno
+
+\`\`\`env
+# URL del backend API
+VITE_API_URL=http://localhost:3000
+
+# Otras configuraciones (opcional)
+VITE_APP_NAME=EcoShop
+VITE_APP_VERSION=1.0.0
+\`\`\`
+
+## 🚀 Deployment
+
+### Vercel (Recomendado)
+
+1. **Conecta tu repositorio a Vercel**
+2. **Configura las variables de entorno en Vercel**
+3. **Deploy automático en cada push**
+
+### Netlify
+
+1. **Conecta tu repositorio a Netlify**
+2. **Configura build command**: \`npm run build\`
+3. **Configura publish directory**: \`dist\`
+
+### Build Manual
+
+\`\`\`bash
+npm run build
+# Los archivos estáticos estarán en /dist
+\`\`\`
+
+## 🔗 API Integration
+
+La aplicación se conecta al backend a través de:
+
+- **Base URL**: Configurada en \`VITE_API_URL\`
+- **Autenticación**: Headers Bearer token
+- **Endpoints principales**:
+  - \`/api/auth/*\` - Autenticación
+  - \`/api/products\` - Productos
+  - \`/api/cart\` - Carrito
+  - \`/api/users\` - Usuarios
+
+## 🧪 Testing
+
+\`\`\`bash
+# Ejecutar tests (cuando estén configurados)
+npm run test
+
+# Coverage
+npm run test:coverage
+\`\`\`
+
+## 📱 Responsive Design
+
+La aplicación está optimizada para:
+- 📱 **Mobile**: 320px - 768px
+- 📟 **Tablet**: 768px - 1024px
+- 🖥️ **Desktop**: 1024px+
+
+## 🔧 Desarrollo
+
+### Agregar nuevas páginas
+
+1. Crear componente en \`src/pages/\`
+2. Agregar ruta en \`App.tsx\`
+3. Actualizar navegación si es necesario
+
+### Agregar nuevos componentes
+
+1. Crear en \`src/components/\`
+2. Exportar desde index si es reutilizable
+3. Documentar props con TypeScript
+
+### Gestión de estado
+
+- **Local**: useState, useReducer
+- **Global**: Context API (AuthContext)
+- **Server**: React Query (futuro)
 
 ## 🐛 Troubleshooting
 
-### Error de conexión a base de datos
-- Verificar que PostgreSQL esté ejecutándose
-- Comprobar \`DATABASE_URL\` en \`.env\`
-- Ejecutar \`npm run db:migrate\`
+### Problemas comunes
 
-### Error de autenticación
-- Verificar \`SUPABASE_URL\` en \`.env\`
-- Comprobar que el token JWT sea válido
-- Verificar configuración de Supabase
+**Error de CORS**
+\`\`\`bash
+# Verificar que el backend esté ejecutándose
+# Verificar VITE_API_URL en .env
+\`\`\`
+
+**Error de autenticación**
+\`\`\`bash
+# Limpiar localStorage
+localStorage.clear()
+\`\`\`
+
+**Error de build**
+\`\`\`bash
+# Limpiar node_modules y reinstalar
+rm -rf node_modules package-lock.json
+npm install
+\`\`\`
 
 ## 🤝 Contribución
 
 1. Fork el proyecto
-2. Crear rama feature (\`git checkout -b feature/AmazingFeature\`)
-3. Commit cambios (\`git commit -m 'Add some AmazingFeature'\`)
+2. Crea una rama para tu feature (\`git checkout -b feature/AmazingFeature\`)
+3. Commit tus cambios (\`git commit -m 'Add some AmazingFeature'\`)
 4. Push a la rama (\`git push origin feature/AmazingFeature\`)
-5. Abrir Pull Request
+5. Abre un Pull Request
 
 ## 📄 Licencia
 
 Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para detalles.
-\`\`\`
 
-## 📋 Resumen de Mejoras Implementadas
+## 👥 Autores
 
-### ✅ **Seguridad**
-- Hash de contraseñas con bcrypt
-- Protección de rutas sensibles
-- No exposición de contraseñas en respuestas
-- Validación de tokens JWT mejorada
+- **Tu Nombre** - *Desarrollo inicial* - [TuGitHub](https://github.com/tuusuario)
 
-### ✅ **Validaciones**
-- Validación de tipos de datos
-- Verificación de stock disponible
-- Validación de emails y contraseñas
-- Verificación de existencia de recursos
+## 🙏 Agradecimientos
 
-### ✅ **Manejo de Errores**
-- Logging de errores
-- Respuestas de error consistentes
-- Validación de IDs numéricos
-- Manejo de casos edge
-
-### ✅ **Estructura**
-- Corrección del typo en schema (unitPrice)
-- Rutas organizadas con prefijo `/api`
-- Middleware de autenticación consistente
-- Variables de entorno validadas
-
-### ✅ **Funcionalidad**
-- Filtros en productos
-- Verificación de productos activos
-- Manejo de stock en carrito
-- Endpoints de salud y documentación
+- React team por la increíble biblioteca
+- Tailwind CSS por el framework de estilos
+- Vite por la herramienta de build rápida
+- Comunidad open source por las librerías utilizadas
