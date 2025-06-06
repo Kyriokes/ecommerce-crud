@@ -108,6 +108,7 @@ app.listen(PORT, () => {
     console.log(`📚 API Documentation: http://localhost:${PORT}/api`);
     console.log(`🏥 Health Check: http://localhost:${PORT}/health`);
     console.log(`🔐 Auth endpoints: http://localhost:${PORT}/api/auth`);
+    console.log("FRONTEND_URL:", process.env.FRONTEND_URL);
 });
 
 export default app;
