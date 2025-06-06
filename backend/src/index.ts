@@ -48,6 +48,11 @@ app.use("/api/users", userRoutes);
 app.use("/api/cart", cartRoutes);
 
 app.get("/", (_req: Request, res: Response) => {
+    console.log(`🚀 Server running on http://localhost:${PORT}`);
+    console.log(`📚 API Documentation: http://localhost:${PORT}/api`);
+    console.log(`🏥 Health Check: http://localhost:${PORT}/health`);
+    console.log(`🔐 Auth endpoints: http://localhost:${PORT}/api/auth`);
+    console.log("FRONTEND_URL:", process.env.FRONTEND_URL);
     res.json({
         message: "Ecommerce API Server is running!",
         version: "1.0.0",
