@@ -56,6 +56,45 @@ npm run db:migrate
 npm run seed
 ```
 
+## 📁 Estructura del Proyecto
+
+```
+backend/
+├── prisma/                    # Configuración y migraciones de la base de datos
+│   ├── migrations/            # Historial de migraciones Prisma
+│   └── schema.prisma          # Definición del modelo de datos
+├── src/                       # Código fuente principal
+│   ├── controllers/           # Lógica de control para cada entidad
+│   │   ├── authController.ts      # Controlador de autenticación
+│   │   ├── cartController.ts      # Controlador de carrito
+│   │   ├── productController.ts   # Controlador de productos
+│   │   └── userController.ts      # Controlador de usuarios
+│   ├── middlewares/          # Middlewares personalizados de Express
+│   │   ├── adminAuth.ts           # Verificación de rol admin
+│   │   ├── authenticateSupabase.ts# Autenticación con Supabase JWT
+│   │   ├── rateLimiter.ts         # Límite de peticiones
+│   │   ├── validateInput.ts       # Validación de datos de entrada
+│   │   └── validateOwnership.ts   # Verifica que un recurso pertenece al usuario
+│   ├── prisma/               # Script de seed para la base de datos
+│   │   └── seed.ts
+│   ├── routes/               # Rutas de la API
+│   │   ├── authRoutes.ts         # Rutas de autenticación
+│   │   ├── cartRoutes.ts         # Rutas del carrito
+│   │   ├── productRoutes.ts      # Rutas de productos
+│   │   └── userRoutes.ts         # Rutas de usuarios
+│   ├── types/                # Tipos personalizados (TypeScript)
+│   │   └── express.d.ts          # Extiende el objeto Request
+│   ├── utils/                # Utilidades generales
+│   │   └── prisma.ts             # Cliente de Prisma centralizado
+│   └── index.ts              # Punto de entrada del servidor
+├── package-lock.json         # Archivo de lock de dependencias
+├── package.json              # Configuración del proyecto y dependencias
+├── readme.md                 # Documentación del backend
+├── tsconfig.json             # Configuración de TypeScript
+└── vercel.json               # Configuración para deploy en Vercel
+
+```
+
 ## 🚀 Uso
 
 ### Desarrollo

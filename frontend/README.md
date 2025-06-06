@@ -75,7 +75,7 @@ npm run type-check   # Verifica tipos de TypeScript
 
 ## 📁 Estructura del Proyecto
 
-\`\`\`
+```
 src/
 ├── components/          # Componentes reutilizables
 │   ├── ui/             # Componentes base (Button, Input, etc.)
@@ -104,7 +104,7 @@ src/
 │   └── auth.ts         # Utilidades de autenticación
 ├── App.tsx             # Componente principal
 └── main.tsx            # Punto de entrada
-\`\`\`
+```
 
 ## 🔐 Autenticación
 

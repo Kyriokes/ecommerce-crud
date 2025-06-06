@@ -14,7 +14,7 @@ EcoShop es una aplicación de comercio electrónico moderna que incluye:
 
 ## 🏗️ Arquitectura del Proyecto
 
-\`\`\`
+```
 ecommerce-fullstack/
 ├── 📁 Frontend (React + TypeScript)
 │   ├── src/
@@ -45,7 +45,7 @@ ecommerce-fullstack/
 ├── package.json            # Scripts del monorepo
 ├── vercel.json            # Configuración de Vercel
 └── README.md              # Este archivo
-\`\`\`
+```
 
 ## 🚀 Tecnologías Utilizadas
 
