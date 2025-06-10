@@ -7,7 +7,7 @@ import {
     Route,
     Navigate,
 } from "react-router-dom";
-import { AuthProvider } from "./contexts/AuthContext";
+import { AuthProvider } from "./contexts/AuthProvider";
 import { useAuth } from "./hooks/useAuth";
 import { Navbar } from "./components/Navbar";
 import { Home } from "./pages/Home";
